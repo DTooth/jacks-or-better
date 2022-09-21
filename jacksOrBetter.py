@@ -1,3 +1,6 @@
+import os.path
+import os
+from PIL import Image
 from math import trunc
 import pygame
 from sys import exit
@@ -43,15 +46,60 @@ back_button_img = pygame.image.load(
 
 
 class Card():
-    def __init__(self, id, suit, color, image):
+    def __init__(self, id, value, suit, color, image):
         width = image.get_width()
         height = image.get_height()
         self.image = pygame.transform.scale(
             image, (int(width), int(height)))
 
+        self.value = value
         self.id = id
         self.suit = suit
         self.color = color
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+
+    def setPos(num):
+        # Set card position when drawn
+        if num == 0:
+            ...
+        elif num == 1:
+            ...
+        elif num == 2:
+            ...
+        elif num == 3:
+            ...
+        else:
+            ...
+
+
+# Get card-file names
+files = []
+valid_images = [".jpg", ".gif", ".png", ".tga"]
+for f in os.listdir('graphics/cards'):
+    ext = os.path.splitext(f)[1]
+    files.append(f)
+
+# Get Unshuffled Deck
+
+
+def getUnshuffledDeck():
+    unshuffled_deck = []
+    for i in files:
+        arr = i.split('_')
+        arr[-1] = arr[-1][:-4]
+        unshuffled_deck.append(
+            Card(arr[0], arr[1], arr[2], arr[3], pygame.image.load('graphics/cards/{}'.format(f)).convert_alpha()))
+    return unshuffled_deck
+
+
+# Get Base Deck
+base_deck = getUnshuffledDeck()
+
+
+def shuffleDeck(deck):
+    # TODO: Shuffle Deck
+    ...
 
 # BUTTON
 
