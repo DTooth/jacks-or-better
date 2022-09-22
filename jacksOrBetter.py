@@ -39,6 +39,10 @@ blank_button_img = pygame.image.load(
     'graphics/buttons/blank_button.png').convert_alpha()
 back_button_img = pygame.image.load(
     'graphics/buttons/back_button.png').convert_alpha()
+selected_card_img = pygame.image.load(
+    'graphics/buttons/selected_card_img.png').convert_alpha()
+selected_card_img = pygame.transform.scale(
+    selected_card_img, (int(selected_card_img.get_width() * 0.5), int(selected_card_img.get_height() * 0.5)))
 # CLASSES:
 # BUTTON
 
@@ -105,6 +109,12 @@ class Card():
     def getImage(self):
         return self.image
 
+    def isSelected(self):
+        return self.selected
+
+    def unselect(self):
+        self.selected = False
+
     def draw(self):
         # Get mouse pos
         # Check mouse over and clicked conditions
@@ -122,10 +132,15 @@ class Card():
                 self.selected = False
                 self.pressed = True
                 print('unselected')
+            if self.pressed:
                 if pygame.mouse.get_pressed()[0] == 0:
                     self.pressed = False
 
-        screen.blit(self.image, (self.rect.x, self.rect.y))
+        if (self.selected):
+            screen.blit(self.image, (self.rect.x, self.rect.y))
+            screen.blit(selected_card_img, (self.rect.x, self.rect.y))
+        else:
+            screen.blit(self.image, (self.rect.x, self.rect.y))
         return self.selected
 # GAME
 
@@ -195,6 +210,9 @@ class Game():
     def getCardsToDraw(self):
         return self.cards_to_draw
 
+    def setCardsToDraw(self, num):
+        self.cards_to_draw = num
+
     def setTurnState(self, state):
         self.turn_state = state
 
@@ -253,7 +271,25 @@ while True:
                 for i in range(0, game.getCardsToDraw()):
                     game.drawCard(i)
                 game.setCardsVisible(True)
+                game.setTurnState(1)
+
             if game.getTurnState() == 1:  # KEEP / DISCARD
+                cards_to_discard = []
+                index = 0
+                for card in game.getDrawnCards():
+                    if card.isSelected():
+                        cards_to_discard.append([card, index])
+                    card.unselect()
+                    index += 1
+
+                game.setCardsToDraw(len(cards_to_discard))
+                for card in cards_to_discard:
+                    game.drawCard(card[1])
+                game.setTurnState(2)
+
+            if game.getTurnState() == 2:  # PAY OUT / RESET
+                game.setTurnState(0)
+
                 # TODO: When we press "DRAW" again. We must check which cards are 'selected' ( getCardsToDraw (Number) )
                 # TODO: Then swap 'selected' cards with new cards by 'draw()'ing
                 # TODO: Check game states (getDrawnCards, game.drawn_cards,)
