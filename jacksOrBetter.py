@@ -118,23 +118,23 @@ class Card():
     def draw(self):
         # Get mouse pos
         # Check mouse over and clicked conditions
+        if not game.getTurnState == 2:
+            if self.rect.collidepoint(pos):
+                if pygame.mouse.get_pressed()[0] == 1 and self.selected == False and not self.pressed:
+                    self.selected = True
+                    self.pressed = True
+                    print('selected')
+                if self.pressed:
+                    if pygame.mouse.get_pressed()[0] == 0:
+                        self.pressed = False
 
-        if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.selected == False and not self.pressed:
-                self.selected = True
-                self.pressed = True
-                print('selected')
-            if self.pressed:
-                if pygame.mouse.get_pressed()[0] == 0:
-                    self.pressed = False
-
-            if pygame.mouse.get_pressed()[0] == 1 and self.selected == True and not self.pressed:
-                self.selected = False
-                self.pressed = True
-                print('unselected')
-            if self.pressed:
-                if pygame.mouse.get_pressed()[0] == 0:
-                    self.pressed = False
+                if pygame.mouse.get_pressed()[0] == 1 and self.selected == True and not self.pressed:
+                    self.selected = False
+                    self.pressed = True
+                    print('unselected')
+                if self.pressed:
+                    if pygame.mouse.get_pressed()[0] == 0:
+                        self.pressed = False
 
         if (self.selected):
             screen.blit(self.image, (self.rect.x, self.rect.y))
@@ -156,15 +156,26 @@ class Game():
         self.drawn_cards = []
         self.cards_displayed = []
         # Deck Info
-        self.curr_deck = self.getUnshuffledDeck()
+        self.curr_deck = []
         # Draw Info
         self.cards_to_draw = 5
 
+    def getFreshDeck(self):
+        unshuffled_deck = []
+        files = []
+        for f in os.listdir('graphics/cards'):
+            files.append(f)
+
+        for i in files:
+            arr = i.split('_')
+            arr[-1] = arr[-1][:-4]
+            unshuffled_deck.append(
+                Card(arr[0], arr[1], arr[2], arr[3], pygame.image.load('graphics/cards/{}'.format(i)).convert_alpha(), .5))
+        self.curr_deck = unshuffled_deck
+        random.shuffle(self.curr_deck)
+
     def isActive(self):
         return self.game_active
-
-    def refreshDeck(self):
-        self.curr_deck = self.getUnshuffledDeck()
 
     def setActive(self, bool):
         self.game_active = bool
@@ -193,22 +204,6 @@ class Game():
     def setCardsVisible(self, bool):
         self.cards_visible = bool
 
-    def getUnshuffledDeck(self):
-        unshuffled_deck = []
-        files = []
-        for f in os.listdir('graphics/cards'):
-            files.append(f)
-
-        for i in files:
-            arr = i.split('_')
-            arr[-1] = arr[-1][:-4]
-            unshuffled_deck.append(
-                Card(arr[0], arr[1], arr[2], arr[3], pygame.image.load('graphics/cards/{}'.format(i)).convert_alpha(), .5))
-        return unshuffled_deck
-
-    def shuffleDeck(self):
-        random.shuffle(self.curr_deck)
-
     def getCardsToDraw(self):
         return self.cards_to_draw
 
@@ -218,9 +213,16 @@ class Game():
     def setTurnState(self, state):
         self.turn_state = state
 
+    def setDrawnCards(self, arr):
+        self.drawn_cards = arr
+
     def drawCard(self, i):
         next_card = self.curr_deck.pop(0)
-        self.drawn_cards.append(next_card)
+        if len(self.drawn_cards) - 1 < i:
+            self.drawn_cards.append(next_card)
+        else:
+            self.drawn_cards[i] = next_card
+        print(len(self.drawn_cards))
         next_card.setPos(i)
 
 
@@ -266,17 +268,19 @@ while True:
         if game.isCardsVisible():
             for card in game.getDrawnCards():
                 card.draw()
-
+        print(game.getTurnState())
         if draw_button.draw():
-            if game.getTurnState() == 0:  # TURN JUST STARTED
-                game.refreshDeck()
-                game.shuffleDeck()
-                for i in range(0, game.getCardsToDraw()):
-                    game.drawCard(i)
-                game.setCardsVisible(True)
-                game.setTurnState(1)
 
-            if game.getTurnState() == 1:  # KEEP / DISCARD
+            if game.getTurnState() == 2:
+                # PAY OUT / RESET
+                # DISPLAY PAYOUT
+                for card in game.getDrawnCards():
+                    card.unselect()
+                game.setCardsVisible(False)
+                game.setTurnState(0)
+
+            elif game.getTurnState() == 1:
+                # KEEP / DISCARD
                 cards_to_discard = []
                 index = 0
                 for card in game.getDrawnCards():
@@ -290,13 +294,14 @@ while True:
                     game.drawCard(card[1])
                 game.setTurnState(2)
 
-            if game.getTurnState() == 2:  # PAY OUT / RESET
-                game.setTurnState(0)
-
-                # TODO: When we press "DRAW" again. We must check which cards are 'selected' ( getCardsToDraw (Number) )
-                # TODO: Then swap 'selected' cards with new cards by 'draw()'ing
-                # TODO: Check game states (getDrawnCards, game.drawn_cards,)
-                ...
+            else:
+                # TURN JUST STARTED
+                game.getFreshDeck()
+                print(game.getCardsToDraw())
+                for i in range(0, game.getCardsToDraw()):
+                    game.drawCard(i)
+                game.setCardsVisible(True)
+                game.setTurnState(1)
 
         blank_button.draw()
         if see_pays_button.draw():
@@ -310,13 +315,6 @@ while True:
         if back_button.draw():
             game_active = False
             # TODO: DRAW
-
-        # TODO Shuffle
-        # TODO Deal
-        # TODO Allow Keep / Discard
-        # TODO DRAW
-        # TODO Payout
-        # TODO Repeat
 
     else:
         # SCREEN
