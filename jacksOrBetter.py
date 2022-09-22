@@ -139,7 +139,7 @@ class Card():
                 if pygame.mouse.get_pressed()[0] == 1 and self.selected == False and not self.pressed:
                     self.selected = True
                     self.pressed = True
-                    print('selected')
+                    # print('selected')
                 if self.pressed:
                     if pygame.mouse.get_pressed()[0] == 0:
                         self.pressed = False
@@ -147,7 +147,7 @@ class Card():
                 if pygame.mouse.get_pressed()[0] == 1 and self.selected == True and not self.pressed:
                     self.selected = False
                     self.pressed = True
-                    print('unselected')
+                    # print('unselected')
                 if self.pressed:
                     if pygame.mouse.get_pressed()[0] == 0:
                         self.pressed = False
@@ -235,7 +235,7 @@ class Game():
         return True
 
     def addCredits(self, num):
-        print('{} credits have been added!'.format(num))
+        # print('{} credits have been added!'.format(num))
         self.credit = self.credit + num
         self.credit_text = casino_font_small.render(
             'CREDITS: {}'.format(self.credit), True, (255, 255, 250)
@@ -306,15 +306,15 @@ class Game():
             self.drawn_cards.append(next_card)
         else:
             self.drawn_cards[i] = next_card
-        print(len(self.drawn_cards))
+        # print(len(self.drawn_cards))
         next_card.setPos(i)
 
     def checkPayout(self, cards):
         valueMap = {}
         suitMap = {}
         for card in cards:
-            print(card.getCardValue())
-            print(card.getCardSuit())
+            # print(card.getCardValue())
+            # print(card.getCardSuit())
             if card.getCardSuit in suitMap.keys():
                 suitMap[card.getCardSuit()] = suitMap[card.getCardSuit()] + 1
             else:
@@ -329,28 +329,30 @@ class Game():
         self.payout_level = 0
         # Check Royal Flush:
         if len(suitMap) == 1:
-            print('FLUSH')
+            # print('FLUSH')
             if (len(valueMap.keys()) > 0):
-                print(list(valueMap.keys()))
+                # print(list(valueMap.keys()))
                 card_values = []
                 for num in list(valueMap.keys()):
                     card_values.append(int(num))
                 card_values.sort()
                 if (card_values[0] == 10):
-                    print('ROYAL FLUSHHH')
+                    # print('ROYAL FLUSHHH')
+                    if (self.bet == 5):
+                        return 4000
                     return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Straight Flush:
         if len(valueMap) == 5:
             if (len(valueMap.keys()) > 0):
-                print(list(valueMap.keys()))
+                # print(list(valueMap.keys()))
                 card_values = []
                 for num in list(valueMap.keys()):
                     card_values.append(int(num))
                 card_values.sort()
                 start = card_values[0]
-                print(card_values)
+                # print(card_values)
                 early_break = False
                 for val in card_values:
                     if not start == val:
@@ -358,40 +360,40 @@ class Game():
                         break
                     start += 1
                 if not early_break and len(suitMap) == 1:
-                    print('STRAIGHT - FLUSH !!!!!!!!!!!!!')
+                    # print('STRAIGHT - FLUSH !!!!!!!!!!!!!')
                     return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Four of a Kind:
         if len(valueMap.keys()) == 2:
             if list(valueMap.values()).sort() == [1, 4]:
-                print('Four of a Kind!!')
+                # print('Four of a Kind!!')
                 return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Full House
         if len(valueMap.keys()) == 2:
             if list(valueMap.values()).sort() == [2, 3]:
-                print('Full House!')
+                # print('Full House!')
                 return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Flush
         if len(suitMap) == 1:
-            print('FLUSH')
+            # print('FLUSH')
             return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Straight
         if len(valueMap) == 5:
             if (len(valueMap.keys()) > 0):
-                print(list(valueMap.keys()))
+                # print(list(valueMap.keys()))
                 card_values = []
                 for num in list(valueMap.keys()):
                     card_values.append(int(num))
                 card_values.sort()
                 start = card_values[0]
-                print(card_values)
+                # print(card_values)
                 early_break = False
                 for val in card_values:
                     if not start == val:
@@ -399,7 +401,7 @@ class Game():
                         break
                     start += 1
                 if not early_break:
-                    print("STRAIGHTTTTTTTT")
+                    # print("STRAIGHTTTTTTTT")
                     return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
@@ -407,13 +409,13 @@ class Game():
         for key in valueMap:
           # print('key', key, map[key])
             if valueMap[key] == 3:
-                print('Three of a Kind!')
+                # print('Three of a Kind!')
                 return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
         # Check Two Pair
         if len(valueMap.keys()) == 3:
-            print('Two Pair!!!')
+            # print('Two Pair!!!')
             return self.bet * self.payout[self.payout_level]
 
         self.payout_level += 1
@@ -421,7 +423,7 @@ class Game():
         for key in valueMap:
           # print('key', key, map[key])
             if int(key) >= 11 and valueMap[key] == 2:
-                print('Jacks or Better')
+                # print('Jacks or Better')
                 return self.bet * self.payout[self.payout_level]
         # No Pay
         return 0
@@ -534,7 +536,7 @@ while True:
                     game.getFreshDeck()
                     game.setDrawnCards([])
                     game.setCardsToDraw(5)
-                    print(game.getCardsToDraw())
+                    # print(game.getCardsToDraw())
                     for i in range(0, game.getCardsToDraw()):
                         game.drawCard(i)
                     game.setCardsVisible(True)
@@ -542,7 +544,8 @@ while True:
                     game.setTurnState(1)
                 else:
                     if game.getCredits() == 0:
-                        print('Out of Credits')
+                        # print('Out of Credits')
+                        ...
 
         if see_pays_button.draw():
             ...
@@ -585,15 +588,16 @@ while True:
         # SCREEN
         screen.blit(start_background_img, (0, 0))
         if start_button.draw():
-            print('Start')
+            # print('Start')
             game.setTurnState(0)
             game.setActive(True)
 
         if settings_button.draw():
-            print('Settings')
+            # print('Settings')
+            ...
 
         if quit_button.draw():
-            print('Quit')
+            # print('Quit')
             pygame.quit()
             exit()
 
