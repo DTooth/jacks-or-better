@@ -156,13 +156,15 @@ class Game():
         self.drawn_cards = []
         self.cards_displayed = []
         # Deck Info
-        self.base_deck = self.getUnshuffledDeck()
         self.curr_deck = self.getUnshuffledDeck()
         # Draw Info
         self.cards_to_draw = 5
 
     def isActive(self):
         return self.game_active
+
+    def refreshDeck(self):
+        self.curr_deck = self.getUnshuffledDeck()
 
     def setActive(self, bool):
         self.game_active = bool
@@ -267,6 +269,7 @@ while True:
 
         if draw_button.draw():
             if game.getTurnState() == 0:  # TURN JUST STARTED
+                game.refreshDeck()
                 game.shuffleDeck()
                 for i in range(0, game.getCardsToDraw()):
                     game.drawCard(i)
