@@ -6,23 +6,13 @@ import pygame
 from sys import exit
 import random
 
-
 pygame.init()
 screen = pygame.display.set_mode((1280, 960))
 pygame.display.set_caption('Jacks or Better')
 clock = pygame.time.Clock()
 casino_font = pygame.font.Font('font/Casino.ttf', 50)
-game_active = False
-new_game = True
-cards_to_draw = 5
-ready_to_draw = False
-turn_state = 0
-drawn_cards = []
-displaying_cards = []
-card_buttons = []
-view_cards = False
 
-# # Load Images
+# Load Images
 # Start Screen
 start_background_img = pygame.image.load(
     'graphics/start_background.png').convert_alpha()
@@ -49,91 +39,7 @@ blank_button_img = pygame.image.load(
     'graphics/buttons/blank_button.png').convert_alpha()
 back_button_img = pygame.image.load(
     'graphics/buttons/back_button.png').convert_alpha()
-
-# CARD
-
-
-class Card():
-    def __init__(self, id, value, suit, color, image, scale):
-        width = image.get_width()
-        height = image.get_height()
-        self.image = pygame.transform.scale(
-            image, (int(width * scale), int(height * scale)))
-
-        self.value = value
-        self.id = id
-        self.suit = suit
-        self.color = color
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (0, 0)
-        self.clicked = False
-
-    def setPos(self, num):
-        # Set card position when drawn
-        print('pos set')
-        if num == 0:
-            self.rect.topleft = (5, 430)
-        elif num == 1:
-            self.rect.topleft = (260, 430)
-        elif num == 2:
-            self.rect.topleft = (515, 430)
-        elif num == 3:
-            self.rect.topleft = (770, 430)
-        else:
-            self.rect.topleft = (1025, 430)
-
-    def getPos(self):
-        return self.rect.topleft
-
-    def getImage(self):
-        return self.image
-
-    def draw(self):
-        action = False
-        # Get mouse pos
-        pos = pygame.mouse.get_pos()
-        # Check mouse over and clicked conditions
-        if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-                action = True
-                self.clicked = True
-            if pygame.mouse.get_pressed()[0] == 0:
-                self.clicked = False
-        screen.blit(self.image, (self.rect.x, self.rect.y))
-        return action
-
-
-# Get card-file names
-files = []
-valid_images = [".jpg", ".gif", ".png", ".tga"]
-for f in os.listdir('graphics/cards'):
-    ext = os.path.splitext(f)[1]
-    files.append(f)
-
-# Get Unshuffled Deck
-
-
-def getUnshuffledDeck():
-    unshuffled_deck = []
-    for i in files:
-        arr = i.split('_')
-        arr[-1] = arr[-1][:-4]
-        unshuffled_deck.append(
-            Card(arr[0], arr[1], arr[2], arr[3], pygame.image.load('graphics/cards/{}'.format(f)).convert_alpha(), .5))
-    return unshuffled_deck
-
-
-# Get Base Deck
-base_deck = getUnshuffledDeck()
-
-# Shuffle Deck
-
-
-def shuffleDeck(deck):
-    arr_copy = list(deck)
-    random.shuffle(arr_copy)
-    return arr_copy
-
+# CLASSES:
 # BUTTON
 
 
@@ -160,6 +66,142 @@ class Button():
                 self.clicked = False
         screen.blit(self.image, (self.rect.x, self.rect.y))
         return action
+# CARD
+
+
+class Card():
+    def __init__(self, id, value, suit, color, image, scale):
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(
+            image, (int(width * scale), int(height * scale)))
+
+        self.value = value
+        self.id = id
+        self.suit = suit
+        self.color = color
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+        self.selected = False
+        self.pressed = False
+
+    def setPos(self, num):
+        # Set card position when drawn
+        print('pos set')
+        if num == 0:
+            self.rect.topleft = (5, 430)
+        elif num == 1:
+            self.rect.topleft = (260, 430)
+        elif num == 2:
+            self.rect.topleft = (515, 430)
+        elif num == 3:
+            self.rect.topleft = (770, 430)
+        else:
+            self.rect.topleft = (1025, 430)
+
+    def getPos(self):
+        return self.rect.topleft
+
+    def getImage(self):
+        return self.image
+
+    def draw(self):
+        # Get mouse pos
+        # Check mouse over and clicked conditions
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.selected == False and not self.pressed:
+                self.selected = True
+                self.pressed = True
+                print('selected')
+            if self.pressed:
+                if pygame.mouse.get_pressed()[0] == 0:
+                    self.pressed = False
+
+            if pygame.mouse.get_pressed()[0] == 1 and self.selected == True and not self.pressed:
+                self.selected = False
+                self.pressed = True
+                print('unselected')
+                if pygame.mouse.get_pressed()[0] == 0:
+                    self.pressed = False
+
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+        return self.selected
+# GAME
+
+
+class Game():
+    def __init__(self):
+        # Game Info
+        self.new_game = True
+        self.game_active = False
+        self.turn_state = 0
+        # Card Info
+        self.cards_visible = False
+        self.drawn_cards = []
+        self.cards_displayed = []
+        # Deck Info
+        self.base_deck = self.getUnshuffledDeck()
+        self.curr_deck = self.getUnshuffledDeck()
+        # Draw Info
+        self.cards_to_draw = 5
+
+    def isActive(self):
+        return self.game_active
+
+    def setActive(self, bool):
+        self.game_active = bool
+
+    def isNewGame(self):
+        return self.new_game
+
+    def getTurnState(self):
+        return self.turn_state
+
+    def isCardsVisible(self):
+        return self.cards_visible
+
+    def getCurrDeck(self):
+        return self.curr_deck
+
+    def getDrawnCards(self):
+        return self.drawn_cards
+
+    def getDisplayedCards(self):
+        return self.cards_displayed
+
+    def setDisplayedCards(self, arr):
+        self.cards_displayed = arr
+
+    def setCardsVisible(self, bool):
+        self.cards_visible = bool
+
+    def getUnshuffledDeck(self):
+        unshuffled_deck = []
+        files = []
+        for f in os.listdir('graphics/cards'):
+            files.append(f)
+
+        for i in files:
+            arr = i.split('_')
+            arr[-1] = arr[-1][:-4]
+            unshuffled_deck.append(
+                Card(arr[0], arr[1], arr[2], arr[3], pygame.image.load('graphics/cards/{}'.format(i)).convert_alpha(), .5))
+        return unshuffled_deck
+
+    def shuffleDeck(self):
+        random.shuffle(self.curr_deck)
+
+    def getCardsToDraw(self):
+        return self.cards_to_draw
+
+    def setTurnState(self, state):
+        self.turn_state = state
+
+    def drawCard(self, i):
+        next_card = self.curr_deck.pop(0)
+        self.drawn_cards.append(next_card)
+        next_card.setPos(i)
 
 
 # Create button instances
@@ -173,12 +215,15 @@ options_button = Button(325, 850, options_button_img, 1)
 blank_button = Button(645, 850, blank_button_img, 1)
 draw_button = Button(965, 850, draw_button_img, 1)
 back_button = Button(5, 920, back_button_img, .5)
-# see_pays_button = Button(5, 850, see_pays_button_img)
 
 
 # TIME
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500)
+
+
+# Create Game
+game = Game()
 
 # GAME LOOP
 while True:
@@ -190,50 +235,30 @@ while True:
             exit()
 
         # GAME ACTIVE
-        if game_active:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                player_gravity = -20
+        if game.isActive:
+            ...
 
-    if game_active:
+        # Display Cards
+
+    if game.isActive():
         # SCREEN
         screen.blit(table_background_img, (0, 0))
-        if view_cards:
-            displaying_cards[0].draw()
-            displaying_cards[1].draw()
-            displaying_cards[2].draw()
-            displaying_cards[3].draw()
-            displaying_cards[4].draw()
+        if game.isCardsVisible():
+            for card in game.getDrawnCards():
+                card.draw()
 
         if draw_button.draw():
+            if game.getTurnState() == 0:  # TURN JUST STARTED
+                game.shuffleDeck()
+                for i in range(0, game.getCardsToDraw()):
+                    game.drawCard(i)
+                game.setCardsVisible(True)
+            if game.getTurnState() == 1:  # KEEP / DISCARD
+                # TODO: When we press "DRAW" again. We must check which cards are 'selected' ( getCardsToDraw (Number) )
+                # TODO: Then swap 'selected' cards with new cards by 'draw()'ing
+                # TODO: Check game states (getDrawnCards, game.drawn_cards,)
+                ...
 
-            if turn_state == 0:  # TURN JUST STARTED
-                print(turn_state)
-                # Get Shuffled Deck
-                shuffledDeck = shuffleDeck(base_deck)
-                print(shuffledDeck)
-                # DRAW 5
-                for i in range(0, cards_to_draw):
-                    drawn_cards.append(shuffledDeck[i])
-                    drawn_cards[i].setPos(i)
-                displaying_cards = drawn_cards
-                drawn_cards = []
-                view_cards = True
-
-                # turn_state += 1
-
-            # if turn_state == 1:  # KEEP / DISCARD CARDS
-            #     print(turn_state)
-            #     turn_state += 1
-            #     # DRAW WHAT IS NEEDED
-            #     continue
-
-            # if turn_state == 2:  # PAYOUT
-            #     print(turn_state)
-            #     # RESET
-            #     turn_state = 0
-            #     continue
-
-            # TODO: DRAW
         blank_button.draw()
         if see_pays_button.draw():
             ...
@@ -259,8 +284,8 @@ while True:
         screen.blit(start_background_img, (0, 0))
         if start_button.draw():
             print('Start')
-            turn_state = 0
-            game_active = True
+            game.setTurnState(0)
+            game.setActive(True)
 
         if settings_button.draw():
             print('Settings')
@@ -270,5 +295,6 @@ while True:
             pygame.quit()
             exit()
 
+    pos = pygame.mouse.get_pos()
     pygame.display.update()
     clock.tick(60)
