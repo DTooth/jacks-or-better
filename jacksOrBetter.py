@@ -118,7 +118,7 @@ class Card():
     def draw(self):
         # Get mouse pos
         # Check mouse over and clicked conditions
-        if not game.getTurnState == 2:
+        if not game.getTurnState() == 2:
             if self.rect.collidepoint(pos):
                 if pygame.mouse.get_pressed()[0] == 1 and self.selected == False and not self.pressed:
                     self.selected = True
@@ -284,7 +284,7 @@ while True:
                 cards_to_discard = []
                 index = 0
                 for card in game.getDrawnCards():
-                    if card.isSelected():
+                    if not card.isSelected():
                         cards_to_discard.append([card, index])
                     card.unselect()
                     index += 1
@@ -296,7 +296,11 @@ while True:
 
             else:
                 # TURN JUST STARTED
+                for card in game.getDrawnCards():
+                    card.unselect()
                 game.getFreshDeck()
+                game.setDrawnCards([])
+                game.setCardsToDraw(5)
                 print(game.getCardsToDraw())
                 for i in range(0, game.getCardsToDraw()):
                     game.drawCard(i)
@@ -312,9 +316,12 @@ while True:
             ...
             # TODO: OPTIONS SCREEN
 
-        if back_button.draw():
-            game_active = False
-            # TODO: DRAW
+        if not game.getTurnState() == 1:
+            if back_button.draw():
+                game.setActive(False)
+                game.setCardsVisible(False)
+                game.setTurnState(0)
+                # TODO: DRAW
 
     else:
         # SCREEN
