@@ -9,12 +9,12 @@ import random
 
 pygame.init()
 screen = pygame.display.set_mode(
-    (1280, 960), flags=pygame.SCALED | pygame.RESIZABLE | pygame.FULLSCREEN)
+    (1280, 960), flags=pygame.SCALED | pygame.FULLSCREEN)
 pygame.display.set_caption('Jacks or Better')
 clock = pygame.time.Clock()
 casino_font = pygame.font.Font('font/casino_font.ttf', 50)
 casino_font_small = pygame.font.Font('font/casino_font.ttf', 35)
-instruction_font = pygame.font.Font('font/raleway.ttf', 20)
+instruction_font = pygame.font.Font('font/raleway.ttf', 25)
 
 # Load Images
 # Start Screen
