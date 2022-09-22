@@ -8,7 +8,8 @@ from sys import exit
 import random
 
 pygame.init()
-screen = pygame.display.set_mode((1280, 960), flags=pygame.SCALED)
+screen = pygame.display.set_mode(
+    (1280, 960), flags=pygame.SCALED | pygame.RESIZABLE)
 pygame.display.set_caption('Jacks or Better')
 clock = pygame.time.Clock()
 casino_font = pygame.font.Font('font/casino_font.ttf', 50)
