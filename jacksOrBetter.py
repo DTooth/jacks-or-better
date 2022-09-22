@@ -164,6 +164,8 @@ class Game():
     def __init__(self):
         # Payout Structure:
         self.payout = [250, 50, 25, 9, 6, 4, 3, 2, 1]
+        self.payout_key = ['Royal Flush', 'Straight Flush', '4 of a Kind', 'Full House',
+                           'Flush', 'Straight', '3 of a Kind', '2 Pair', 'Jacks or Better']
         # Game Info
         self.isWin = False
         self.yellow = (255, 200, 0)
@@ -195,6 +197,9 @@ class Game():
 
         self.instruc_text = None
         self.instruc_text_rect = None
+
+    def getPayoutName(self, index):
+        return self.payout_key[index]
 
     def setInstrucText(self, text):
         self.instruc_text = instruction_font.render(
@@ -320,9 +325,21 @@ class Game():
                 valueMap[card.getCardValue()] = 1
 
         # TODO: Check payout for given hand
-        payout_level = 0
+        self.payout_level = 0
         # Check Royal Flush:
-        payout_level += 1
+        if len(suitMap) == 1:
+            print('FLUSH')
+            if (len(valueMap.keys()) > 0):
+                print(list(valueMap.keys()))
+                card_values = []
+                for num in list(valueMap.keys()):
+                    card_values.append(int(num))
+                card_values.sort()
+                if (card_values[0] == 10):
+                    print('ROYAL FLUSHHH')
+                    return self.bet * self.payout[self.payout_level]
+
+        self.payout_level += 1
         # Check Straight Flush:
         if len(valueMap) == 5:
             if (len(valueMap.keys()) > 0):
@@ -341,28 +358,29 @@ class Game():
                     start += 1
                 if not early_break and len(suitMap) == 1:
                     print('STRAIGHT - FLUSH !!!!!!!!!!!!!')
-                    return self.bet * self.payout[payout_level]
+                    return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Four of a Kind:
         if len(valueMap.keys()) == 2:
             if list(valueMap.values()).sort() == [1, 4]:
                 print('Four of a Kind!!')
-                return self.bet * self.payout[payout_level]
+                return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Full House
         if len(valueMap.keys()) == 2:
             if list(valueMap.values()).sort() == [2, 3]:
                 print('Full House!')
-                return self.bet * self.payout[payout_level]
+                return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Flush
         if len(suitMap) == 1:
             print('FLUSH')
-            return self.bet * self.payout[payout_level]
-        payout_level += 1
+            return self.bet * self.payout[self.payout_level]
+
+        self.payout_level += 1
         # Check Straight
         if len(valueMap) == 5:
             if (len(valueMap.keys()) > 0):
@@ -381,29 +399,29 @@ class Game():
                     start += 1
                 if not early_break:
                     print("STRAIGHTTTTTTTT")
-                    return self.bet * self.payout[payout_level]
+                    return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Three of a Kind
         for key in valueMap:
           # print('key', key, map[key])
             if valueMap[key] == 3:
                 print('Three of a Kind!')
-                return self.bet * self.payout[payout_level]
+                return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Two Pair
         if len(valueMap.keys()) == 3:
             print('Two Pair!!!')
-            return self.bet * self.payout[payout_level]
+            return self.bet * self.payout[self.payout_level]
 
-        payout_level += 1
+        self.payout_level += 1
         # Check Jacks or Better
         for key in valueMap:
           # print('key', key, map[key])
             if int(key) >= 11 and valueMap[key] == 2:
                 print('Jacks or Better')
-                return self.bet * self.payout[payout_level]
+                return self.bet * self.payout[self.payout_level]
         # No Pay
         return 0
     # TODO: Return amount to add. bet * payout
@@ -466,7 +484,7 @@ while True:
         if game.getTurnState() == 2:
             if game.isWin:
                 game.setInstrucText(
-                    'Congrats you have won! Select DRAW to play again.')
+                    'Congrats you have won {} credits on a {}! Select DRAW to play again.'.format(game.bet * game.payout[game.payout_level], game.getPayoutName(game.payout_level)))
             else:
                 game.setInstrucText(
                     'Better luck next time. Selected DRAW to play again.')
